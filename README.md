@@ -9,9 +9,9 @@ T-SQL Logger is SQL Server logging framework for use with stored procedures. It 
 - Logging production database execution where profilers are restricted
 
 ## Documentation
-- [Installation](docs/Installation.md)
-- [API](docs/Logger%20API.md)
-- [Best Practices](docs/Best%20Practices.md)
+- [Installation](docs/installation.md)
+- [API](docs/api.md)
+- [Best Practices](docs/best%20practices.md)
 
 ## License
 This project is uses the [MIT license](LICENSE).
