@@ -14,7 +14,7 @@ T-SQL Logger is SQL Server logging framework for use with stored procedures. It 
 - [Best Practices](docs/best%20practices.md)
 
 ## License
-This project is uses the [MIT license](LICENSE).
+This project uses the [MIT license](LICENSE).
 
 ## Credit
 This logger solution was inspired by the OraOpenSource Logger http://www.oraopensource.com/logger/. Their API along with some implementation details were adopted under permission of their MIT License.
