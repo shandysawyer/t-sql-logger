@@ -791,7 +791,7 @@ begin
     where logger_level > 1;
 end;
 go
-raiserror(N'Logger Methods Installed',0,1) with nowait;
+raiserror(N'Logger Procedures Installed',0,1) with nowait;
 
 
 
