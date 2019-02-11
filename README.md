@@ -1,12 +1,11 @@
 # T-SQL Logger
 
 ## Overview
-T-SQL Logger is SQL Server logging framework for use with stored procedures. It is intended to help with: 
+T-SQL Logger is a SQL Server logging framework for use with stored procedures. It is intended to help with: 
 - Profiling execution time
 - Researching performance issues 
 - Debugging unhandled errors 
-- Logging errors caused by circumstantial data not covered during unit testing
-- Logging production database execution where profilers are restricted
+- Logging database execution where profilers are restricted
 
 ## Documentation
 - [Installation](docs/installation.md)
