@@ -76,7 +76,7 @@ begin
 
 	-- table variables live outside of transactions
 	declare @params as logger.logger_tab_param;
-	declare @log as logger.logger_tab_transaction;
+	declare @log as logger.logger_tab_tran;
 
 	begin try
 		exec logger.log_information 'Executing', @obj_name, @params;
