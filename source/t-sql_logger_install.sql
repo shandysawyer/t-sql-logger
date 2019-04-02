@@ -11,8 +11,8 @@ set nocount on;
 -----------------------------------------------------------------------------------------
 if not exists (select name from sys.schemas where name = N'logger')
 begin
-      exec('create schema [logger] authorization [dbo]');
-	  raiserror(N'Schema Installed',0,1) with nowait;
+	exec('create schema [logger] authorization [dbo]');
+	raiserror(N'Schema Installed',0,1) with nowait;
 end;
 
 
@@ -22,14 +22,14 @@ if object_id(N'logger.logger_logs', N'U') is null
 begin
 	create table logger.logger_logs 
 	(
-		[id]				int primary key identity(1,1) not null,
-		[logger_level]		int	,
-		[text]				nvarchar(4000),
-		[scope]				nvarchar(1000),
+		[id]			int primary key identity(1,1) not null,
+		[logger_level]		int,
+		[text]			nvarchar(4000),
+		[scope]			nvarchar(1000),
 		[time_stamp]		datetime2,
 		[session_id]		smallint,
 		[service_name]		nvarchar(1000),
-		[user_name]			nvarchar(255),
+		[user_name]		nvarchar(255),
 		[client_identifier]	nvarchar(255),
 		[error_line]		int, 
 		[error_message]		nvarchar(4000), 
@@ -37,8 +37,8 @@ begin
 		[error_procedure]	nvarchar(100), 
 		[error_severity]	int,
 		[error_state]		int,
-		[params]			nvarchar(max),
-		[extra]				nvarchar(max)
+		[params]		nvarchar(max),
+		[extra]			nvarchar(max)
 	);
 end;
 go
@@ -72,14 +72,14 @@ if type_id(N'logger.logger_tab_tran') is null
 begin
 	create type logger.logger_tab_tran as table
 	(
-		[id]				int primary key identity(1,1) not null,
-		[logger_level]		int	,
-		[text]				nvarchar(4000),
-		[scope]				nvarchar(1000),
+		[id]			int primary key identity(1,1) not null,
+		[logger_level]		int,
+		[text]			nvarchar(4000),
+		[scope]			nvarchar(1000),
 		[time_stamp]		datetime2,
 		[session_id]		smallint,
 		[service_name]		nvarchar(1000),
-		[user_name]			nvarchar(255),
+		[user_name]		nvarchar(255),
 		[client_identifier]	nvarchar(255),
 		[error_line]		int, 
 		[error_message]		nvarchar(4000), 
@@ -87,8 +87,8 @@ begin
 		[error_procedure]	nvarchar(100), 
 		[error_severity]	int,
 		[error_state]		int,
-		[params]			nvarchar(max),
-		[extra]				nvarchar(max)
+		[params]		nvarchar(max),
+		[extra]			nvarchar(max)
 	);
 end;
 go
@@ -101,8 +101,8 @@ raiserror(N'Types Installed',0,1) with nowait;
 merge into logger.logger_prefs p
 using (
 	select N'PURGE_AFTER_DAYS' pref_name, N'14' pref_value union
-	select N'PURGE_MIN_LEVEL' pref_name, N'DEBUG' pref_value union
-	select N'LEVEL' pref_name, N'DEBUG' pref_value union
+	select N'PURGE_MIN_LEVEL' pref_name, N'INFORMATION' pref_value union
+	select N'LEVEL' pref_name, N'INFORMATION' pref_value union
 	select N'VERBOSE' pref_name, N'1' pref_value union
 	select N'VERSION' pref_name, N'1.0' pref_value
 ) d
@@ -131,6 +131,7 @@ as
 begin 
 	declare @logger_level int, @ret bit;
 	select @logger_level = case pref_value
+		when N'OFF' then 0
 		when N'PERMANENT' then 1
 		when N'ERROR' then 2
 		when N'WARNING' then 4
@@ -237,9 +238,9 @@ end;
 go
 create procedure [logger].[log_permanent] 
 (
-    @text nvarchar(4000),
-    @scope nvarchar(1000) = null,
-    @params logger.logger_tab_param readonly,
+	@text nvarchar(4000),
+	@scope nvarchar(1000) = null,
+	@params logger.logger_tab_param readonly,
 	@extra nvarchar(max) = null
 )
 as
@@ -296,9 +297,9 @@ end;
 go
 create procedure [logger].[log_error] 
 (
-    @text nvarchar(4000),
-    @scope nvarchar(1000) = null,
-    @params logger.logger_tab_param readonly,
+	@text nvarchar(4000),
+	@scope nvarchar(1000) = null,
+	@params logger.logger_tab_param readonly,
 	@extra nvarchar(max) = null
 )
 as
@@ -366,9 +367,9 @@ end;
 go
 create procedure [logger].[log_information] 
 (
-    @text nvarchar(4000),
-    @scope nvarchar(1000) = null,
-    @params logger.logger_tab_param readonly,
+	@text nvarchar(4000),
+	@scope nvarchar(1000) = null,
+	@params logger.logger_tab_param readonly,
 	@extra nvarchar(max) = null
 )
 as
@@ -425,9 +426,9 @@ end;
 go
 create procedure [logger].[log_warning] 
 (
-    @text nvarchar(4000),
-    @scope nvarchar(1000) = null,
-    @params logger.logger_tab_param readonly,
+	@text nvarchar(4000),
+	@scope nvarchar(1000) = null,
+	@params logger.logger_tab_param readonly,
 	@extra nvarchar(max) = null
 )
 as
@@ -755,24 +756,25 @@ begin
 
 	if @purge_min_level is null
 		select @lpurge_min_level = case pref_value
-		  when N'PERMANENT'    then 1
-		  when N'ERROR'        then 2
-		  when N'WARNING'      then 4
-		  when N'INFORMATION'  then 8
-		  when N'DEBUG'        then 16
+			when N'OFF'		then 0
+			when N'PERMANENT'	then 1
+			when N'ERROR'		then 2
+			when N'WARNING'		then 4
+			when N'INFORMATION'	then 8
+			when N'DEBUG'		then 16
 		end from logger.logger_prefs where pref_name = N'PURGE_MIN_LEVEL';
 	else
 		set @lpurge_min_level = case @purge_min_level
-		  when N'PERMANENT'    then 1
-		  when N'ERROR'        then 2
-		  when N'WARNING'      then 4
-		  when N'INFORMATION'  then 8
-		  when N'DEBUG'        then 16 end;
+			when N'PERMANENT'	then 1
+			when N'ERROR'		then 2
+			when N'WARNING'		then 4
+			when N'INFORMATION'	then 8
+			when N'DEBUG'		then 16 end;
 	
-	delete from logger_logs
-    where logger_level >= @lpurge_min_level
+	delete from [logger].[logger_logs]
+	where logger_level >= @lpurge_min_level
 		and time_stamp < dateadd(day, @lpurge_after_days, sysdatetime())
-        and logger_level > 1;
+        	and logger_level > 1;
 end;
 go
 
@@ -787,8 +789,8 @@ create procedure [logger].[purge_all]
 as
 begin
 	set nocount on;
-	delete from logger_logs
-    where logger_level > 1;
+	delete from logger.logger_logs
+	where logger_level > 1;
 end;
 go
 raiserror(N'Logger Procedures Installed',0,1) with nowait;
@@ -806,7 +808,7 @@ declare
 select @jobId = job_id from msdb.dbo.sysjobs where (name = @job)
 if (@jobId IS NOT NULL)
 begin
-    exec msdb.dbo.sp_delete_job @jobId
+	exec msdb.dbo.sp_delete_job @jobId
 end;
 
 --Add a job
@@ -815,11 +817,11 @@ exec msdb.dbo.sp_add_job
 
 --Add a job step named process step. This step runs the stored procedure
 exec msdb.dbo.sp_add_jobstep
-    @job_name = @job,
-    @step_name = N'process step',
-    @subsystem = N'TSQL',
+	@job_name = @job,
+	@step_name = N'process step',
+	@subsystem = N'TSQL',
 	@database_name = @db,
-    @command = N'logger.purge';
+	@command = N'logger.purge';
 
 --Schedule the job at a specified date and time
 exec msdb.dbo.sp_add_jobschedule 
@@ -832,7 +834,7 @@ exec msdb.dbo.sp_add_jobschedule
 
 -- Add the job to the SQL Server Server
 exec msdb.dbo.sp_add_jobserver
-    @job_name =  @job;
+	@job_name =  @job;
 
 raiserror(N'Logger Purge Job Installed',0,1) with nowait;
 
