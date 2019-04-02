@@ -35,7 +35,7 @@ begin
 	-- log method parameters here
 	declare @params as logger.logger_tab_param;
 	insert into @params (name, val) 
-	values('id', convert(varchar, @id)),
+	values('id', convert(varchar(10), @id)),
 		('value', @value);
 
 	-- method name here
