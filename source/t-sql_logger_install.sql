@@ -765,6 +765,7 @@ begin
 		end from logger.logger_prefs where pref_name = N'PURGE_MIN_LEVEL';
 	else
 		set @lpurge_min_level = case @purge_min_level
+			when N'OFF'		then 0
 			when N'PERMANENT'	then 1
 			when N'ERROR'		then 2
 			when N'WARNING'		then 4
