@@ -701,7 +701,7 @@ end;
 go
 create procedure [logger].[log_tran_finalize] 
 (
-	@transaction_table logger.logger_tab_tran readonly
+	@table logger.logger_tab_tran readonly
 )
 as
 begin
@@ -709,6 +709,24 @@ begin
 	set transaction isolation level read uncommitted;
 	
 	insert into [logger].[logger_logs]
+	(
+		[logger_level],
+		[text],
+		[scope],
+		[time_stamp],
+		[session_id],
+		[service_name],
+		[user_name],
+		[client_identifier],
+		[error_line],	
+		[error_message],	
+		[error_number],	
+		[error_procedure],
+		[error_severity],
+		[error_state],
+		[params],
+		[extra]
+	)
 	select
 		[logger_level],
 		[text],
@@ -726,7 +744,7 @@ begin
 		[error_state],
 		[params],
 		[extra]
-	from @transaction_table;
+	from @table;
 end;
 go
 
