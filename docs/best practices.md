@@ -69,7 +69,7 @@ end;
 create procedure [dbo].[test_proc_with_transaction]
 as
 begin
-	set nocount on;
+	set xact_abort, nocount on;
 
 	-- get name of the object in scope
 	declare @obj_name nvarchar(128) = object_schema_name(@@procid) + '.' + object_name(@@procid);
@@ -84,7 +84,7 @@ begin
 		exec logger.log_debug 'Do some work here', @obj_name, @params;
 
 		-- begin our unit of work
-		begin transaction test;
+		begin transaction;
 
 		-- here we need to log with a different method than normal
 		-- the data is passed of out of the procedure and is collected into the table variable
@@ -95,7 +95,7 @@ begin
 
 		insert into @log exec logger.log_tran_debug 'Do more intensive work here', @obj_name, @params;
 
-		commit transaction test;
+		commit transaction;
 
 		-- this will move the data accumulated from the table variable into the logger_logs table
 		exec logger.log_tran_finalize @log;
@@ -106,7 +106,7 @@ begin
 		if (@@trancount > 0)
 		begin
 			insert into @log exec logger.log_tran_error 'Unhandled exception in transaction', @obj_name, @params;
-			rollback transaction test;
+			rollback transaction;
 			exec logger.log_tran_finalize @log;
 		end
 		else
