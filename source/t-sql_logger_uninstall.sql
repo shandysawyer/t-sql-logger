@@ -79,9 +79,9 @@ begin
 end;
 go
 
-if object_id(N'logger.log_tran_finalize', N'P') IS NOT NULL
+if object_id(N'logger.log_tran_flush', N'P') IS NOT NULL
 begin
-	drop procedure [logger].[log_tran_finalize]; 
+	drop procedure [logger].[log_tran_flush]; 
 end;
 go
 
