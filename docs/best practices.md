@@ -5,7 +5,7 @@
 create procedure [dbo].[test_proc]
 as
 begin
-	set xact_abort, no_count on;
+	set xact_abort, nocount on;
 
 	begin try
 		-- get name of the object in scope
@@ -34,18 +34,16 @@ end;
 create procedure [dbo].[test_proc_w_params] ( @id int, @value varchar(10) )
 as
 begin
-	set xact_abort, no_count on;
+	set xact_abort, nocount on;
 
 	begin try
+		declare @obj_name nvarchar(128) = object_schema_name(@@procid) + '.' + object_name(@@procid),
+			@params as logger.logger_tab_param,
+			@log_text nvarchar(4000);
+
 		-- log procedure parameters
-		declare @params as logger.logger_tab_param;
 		insert into @params (name, val) 
-		values('id', convert(varchar(10), @id)),
-			('value', @value);
-	
-		-- get procedure name
-		declare @obj_name nvarchar(128) = object_schema_name(@@procid) + '.' + object_name(@@procid);
-		declare @log_text nvarchar(4000);
+		values('id', convert(varchar(10), @id)), ('value', @value);
 
 		-- log the start of the procedure
 		exec logger.log_information 'Executing', @obj_name, @params;
@@ -74,12 +72,10 @@ begin
 	set xact_abort, nocount on;
 
 	begin try
-		-- get name of the object in scope
-		declare @obj_name nvarchar(128) = object_schema_name(@@procid) + '.' + object_name(@@procid);
-	
-		-- table variables live outside of transactions
-		declare @params as logger.logger_tab_param;
-		declare @log as logger.logger_tab_tran;
+		declare @obj_name nvarchar(128) = object_schema_name(@@procid) + '.' + object_name(@@procid),
+			@params as logger.logger_tab_param,
+			@log as logger.logger_tab_tran,
+			@log_text nvarchar(4000);
 
 		exec logger.log_information 'Executing', @obj_name, @params;
 
@@ -136,7 +132,7 @@ go
 create procedure [dbo].[call_proc]
 as
 begin
-	set xact_abort, no_count on;
+	set xact_abort, nocount on;
 
 	begin try
 		-- get name of the object in scope
