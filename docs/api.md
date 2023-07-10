@@ -15,9 +15,9 @@ log_[level] (
 ### Parameters
 Parameter| Description
 ------------ | -------------
-@text	| text maps to the TEXT column in LOGGER_LOGS.
+@text	| maps to the `text` column in `logger_logs`. Can be used to describe the operation is about to execute, has finished execution,  the state of variables, etc.
 @scope	| scope is optional but highly recommend. The idea behind scope is to give some context to the log message, such as the database, schema and/or procedure where it was called.
-@params	| params is for storing any parameters passed if applicable. Each parameter name/value pair will be comma delimted like so: “param1: val, param2: val, ... ”.
+@params	| params is for storing any method parameters passed into the procedure. Each parameter name/value pair will be comma delimted like so: “param1: val, param2: val, ... ”.
 @extra | extra is used when you may have extra elements to capture. This was originally introduced to help capture resulting generated dynamic SQL from other processes during execution. The extra designation was applied for any other unforeseen items not thought of to be stored here as well.
  
 ### Examples
@@ -47,22 +47,22 @@ This procedure will log an entry into the LOGGER_LOGS table when the logger_leve
 This procedure will log an entry into the LOGGER_LOGS table when the logger_level is set to "PERMANENT" in the logger_prefs table. These logs are permanent and will not be deleted when executing purge or purge_all procedures.
  
 ### LOG_TRAN_DEBUG
-This procedure is meant to be used in conjunction with transactions. The procedure will return data which is then mean to be inserted into a table variable of type logger.logger_tab_tran. To complete the process, logger.log_tran_finalize must be called otherwise the data will be lost. This will only log when the logger_level is set to "DEBUG" in the logger_prefs table.
+This procedure is meant to be used in conjunction with transactions. The procedure will return data which is then mean to be inserted into a table variable of type logger.logger_tab_tran. To complete the process, logger.log_tran_flush must be called otherwise the data will be lost. This will only log when the logger_level is set to "DEBUG" in the logger_prefs table.
  
 ### LOG_TRAN_INFORMATION
-This procedure is meant to be used in conjunction with transactions. The procedure will return data which is then mean to be inserted into a table variable of type logger.logger_tab_tran. To complete the process, logger.log_tran_finalize must be called otherwise the data will be lost. This will only log when the logger_level is set to "INFORMATION" in the logger_prefs table.
+This procedure is meant to be used in conjunction with transactions. The procedure will return data which is then mean to be inserted into a table variable of type logger.logger_tab_tran. To complete the process, logger.log_tran_flush must be called otherwise the data will be lost. This will only log when the logger_level is set to "INFORMATION" in the logger_prefs table.
  
 ### LOG_TRAN_WARNING
-This procedure is meant to be used in conjunction with transactions. The procedure will return data which is then mean to be inserted into a table variable of type logger.logger_tab_tran. To complete the process, logger.log_tran_finalize must be called otherwise the data will be lost. This will only log when the logger_level is set to "WARNING" in the logger_prefs table.
+This procedure is meant to be used in conjunction with transactions. The procedure will return data which is then mean to be inserted into a table variable of type logger.logger_tab_tran. To complete the process, logger.log_tran_flush must be called otherwise the data will be lost. This will only log when the logger_level is set to "WARNING" in the logger_prefs table.
  
 ### LOG_TRAN_ERROR
-This procedure is meant to be used in conjunction with transactions. The procedure will return data which is then mean to be inserted into a table variable of type logger.logger_tab_tran. To complete the process, logger.log_tran_finalize must be called otherwise the data will be lost. This will only log when the logger_level is set to "ERROR" in the logger_prefs table. This procedure should only be used inside a catch block.
+This procedure is meant to be used in conjunction with transactions. The procedure will return data which is then mean to be inserted into a table variable of type logger.logger_tab_tran. To complete the process, logger.log_tran_flush must be called otherwise the data will be lost. This will only log when the logger_level is set to "ERROR" in the logger_prefs table. This procedure should only be used inside a catch block.
  
-### LOG_TRAN_FINALIZE
-This procedure is called to push data from the table type logger.logger_tab_tran that is collecting data during a transaction into the logger_logs table. See Best Practices for reference on usage.
+### LOG_TRAN_FLUSH
+This procedure is called to flush the data from the table variable of type logger.logger_tab_tran that is collecting data during a transaction into the logger_logs table. See Best Practices for reference on usage.
 
 ### PURGE
-Purges all non-permanent entries older than X days for a given logger level and above
+Deletes all non-permanent entries older than X days for a given logger level and above in the logger_logs table
  
 #### Syntax
 ```sql
@@ -79,7 +79,7 @@ purge_after_days | Purge entries older than n days. If left NULL then the value 
 purge_min_level	| Minimum level to purge entries. For example if set to "INFORMATION" then information and debug will be deleted. If left NULL then the value from the logger_prefs table is used by default.
  
 ### PURGE_ALL
-Purges all non-permanent entries in LOGGER_LOGS.
+Deletes all non-permanent entries in the logger_logs table.
  
 #### Syntax
 ```sql
