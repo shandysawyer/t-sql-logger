@@ -77,25 +77,28 @@ begin
 			@log as logger.logger_tab_tran,
 			@log_text nvarchar(4000);
 
+		-- log that our procedure has started
 		exec logger.log_information 'Executing', @obj_name, @params;
 
 		-- begin our unit of work
 		begin transaction;
 
-		-- here we need to log with a different method than normal
-		-- the data is passed out of the log_tran_debug procedure and is collected into the table variable
-		insert into @log exec logger.log_tran_debug 'Do intensive work here', @obj_name, @params;
+		-- logger has specific transaction methods that returns a dataset to be inserted into a logging table variable.
+		-- table variables live outside of transactions and the log information won't be lost should any operations fail.
+		insert into @log exec logger.log_tran_information 'Transaction started', @obj_name, @params;
 
-		-- simulate error
-		select 1/0;
+		-- do important business work
+		insert into test_table select 1, 'Test';
+		set @log_text = 'Inserted ' + convert(varchar(10), @@rowcount) + ' row(s) into test_table in transaction';
+		insert into @log exec logger.log_tran_debug @log_text, @obj_name, @params;
 
-		insert into @log exec logger.log_tran_debug 'Do more intensive work here', @obj_name, @params;
-
+		-- complete our unit of work
 		commit transaction;
 
-		-- this will move the data accumulated from the table variable into the logger_logs table
+		-- this will flush all accumulated logger calls in the table variable into the logger_logs table
 		exec logger.log_tran_finalize @log;
 
+		-- log that the procedure has finished
 		exec logger.log_information 'Finished', @obj_name, @params;
 	end try
 	begin catch
