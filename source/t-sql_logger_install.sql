@@ -694,14 +694,14 @@ end;
 go
 
 
-if object_id(N'logger.log_tran_finalize', N'P') IS NOT NULL
+if object_id(N'logger.log_tran_flush', N'P') IS NOT NULL
 begin
-	drop procedure [logger].[log_tran_finalize]; 
+	drop procedure [logger].[log_tran_flush]; 
 end;
 go
-create procedure [logger].[log_tran_finalize] 
+create procedure [logger].[log_tran_flush] 
 (
-	@table logger.logger_tab_tran readonly
+	@logs_in_tran logger.logger_tab_tran readonly
 )
 as
 begin
@@ -744,7 +744,7 @@ begin
 		[error_state],
 		[params],
 		[extra]
-	from @table;
+	from @logs_in_tran;
 end;
 go
 
@@ -780,7 +780,8 @@ begin
 			when N'WARNING'		then 4
 			when N'INFORMATION'	then 8
 			when N'DEBUG'		then 16
-		end from logger.logger_prefs where pref_name = N'PURGE_MIN_LEVEL';
+		end from logger.logger_prefs 
+		where pref_name = N'PURGE_MIN_LEVEL';
 	else
 		set @lpurge_min_level = case @purge_min_level
 			when N'OFF'		then 0
