@@ -96,7 +96,7 @@ begin
 		commit transaction;
 
 		-- this will flush all accumulated logger calls in the table variable into the logger_logs table
-		exec logger.log_tran_finalize @log;
+		exec logger.log_tran_flush @log;
 
 		-- log that the procedure has finished
 		exec logger.log_information 'Finished', @obj_name, @params;
@@ -109,7 +109,7 @@ begin
 			-- log the error
 			insert into @log exec logger.log_tran_error 'Unhandled exception in transaction', @obj_name, @params;
 			-- flush all logs from the table variable into the log table otherwise it will be lost
-			exec logger.log_tran_finalize @log;
+			exec logger.log_tran_flush @log;
 		end
 		else
 			exec logger.log_error 'Unhandled Exception', @obj_name, @params;
@@ -121,7 +121,7 @@ end;
 ```
 
 ## Logging in Functions
-SQL Server does not allow procedure excution inside of User Defined Functions, so the log functions cannot be excuted inside of them. To get around this, the logger methods could be executed in a calling procedure. This could be overkill in certain scenarios, but if your function is returning data from a complex query you are concerned about, it could be worth the added code overhead.
+SQL Server does not allow procedure excution inside of User Defined Functions. As a work-around, the logger procedures could be executed in a calling procedure. This could be overkill in certain scenarios, but if your function is returning data from a complex query you are concerned about, it could be worth the added code overhead.
 
 ```sql
 create function [dbo].[test_func]( @id int )
