@@ -77,28 +77,45 @@ begin
 			@log as logger.logger_tab_tran,
 			@log_text nvarchar(4000);
 
-		-- log that our procedure has started
 		exec logger.log_information 'Executing', @obj_name, @params;
 
-		-- begin our unit of work
+		-- begin the first unit of work
 		begin transaction;
 
 		-- logger has specific transaction methods that returns a dataset to be inserted into a logging table variable.
 		-- table variables live outside of transactions and the log information won't be lost should any operations fail.
-		insert into @log exec logger.log_tran_information 'Transaction started', @obj_name, @params;
+		insert into @log exec logger.log_tran_information 'First transaction started', @obj_name, @params;
 
 		-- do important business work
 		insert into test_table select 1, 'Test';
 		set @log_text = 'Inserted ' + convert(varchar(10), @@rowcount) + ' row(s) into test_table in transaction';
 		insert into @log exec logger.log_tran_debug @log_text, @obj_name, @params;
 
-		-- complete our unit of work
+		-- complete first unit of work
 		commit transaction;
+		insert into @log exec logger.log_tran_information 'First transaction completed', @obj_name, @params;
 
-		-- this will flush all accumulated logger calls in the table variable into the logger_logs table
+		-- copy all accumulated logger calls in the table variable into the logger_logs table
 		exec logger.log_tran_flush @log;
 
-		-- log that the procedure has finished
+		-- delete out the logs from the table variable for next unit of work
+		delete from @log;
+
+		-- begin another unit of work
+		begin transaction;
+		insert into @log exec logger.log_tran_information 'Second transaction started', @obj_name, @params;
+
+		insert into test_table select 2, 'Test again';
+		set @log_text = 'Inserted ' + convert(varchar(10), @@rowcount) + ' row(s) into test_table in transaction';
+		insert into @log exec logger.log_tran_debug @log_text, @obj_name, @params;
+
+		-- complete second unit of work
+		commit transaction;
+		insert into @log exec logger.log_tran_information 'Second transaction completed', @obj_name, @params;
+
+		-- copy all accumulated logger calls in the table variable into the logger_logs table
+		exec logger.log_tran_flush @log;
+
 		exec logger.log_information 'Finished', @obj_name, @params;
 	end try
 	begin catch
